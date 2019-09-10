@@ -140,8 +140,11 @@ const makePlugins = (isProduction = false, outputFolder) => [
   isProduction ? terserMinified : terserPretty
 ].filter(Boolean);
 
-const makeConfig = (input) => ({
-  input,
+const makeConfig = () => ({
+  input: {
+    core: './src/client.ts',
+    urql: './src/index.ts'
+  },
   external: externalTest,
   treeshake: {
     propertyReadSideEffects: false
@@ -150,7 +153,7 @@ const makeConfig = (input) => ({
 
 export default [
   {
-    ...makeConfig('./src/index.ts'),
+    ...makeConfig(),
     plugins: makePlugins(false, './dist'),
     output: [
       {
@@ -158,7 +161,7 @@ export default [
         legacy: true,
         freeze: false,
         esModule: false,
-        file: './dist/urql.js',
+        dir: './dist/cjs',
         format: 'cjs',
       },
       {
@@ -166,13 +169,13 @@ export default [
         legacy: true,
         freeze: false,
         esModule: false,
-        file: './dist/urql.es.js',
+        dir: './dist/es',
         format: 'esm',
       },
     ],
   },
   {
-    ...makeConfig('./src/index.ts'),
+    ...makeConfig(),
     plugins: makePlugins(true, './dist'),
     onwarn: () => {},
     output: [
@@ -180,57 +183,14 @@ export default [
         sourcemap: false,
         legacy: true,
         freeze: false,
-        file: './dist/urql.min.js',
+        dir: './dist/cjs/min',
         format: 'cjs',
       },
       {
         sourcemap: false,
         legacy: true,
         freeze: false,
-        file: './dist/urql.es.min.js',
-        format: 'esm',
-      },
-    ],
-  },
-  {
-    ...makeConfig('./src/client.ts'),
-    plugins: makePlugins(false, './core/dist'),
-    output: [
-      {
-        sourcemap: true,
-        legacy: true,
-        freeze: false,
-        esModule: false,
-        file: './core/dist/urql-core.js',
-        format: 'cjs',
-      },
-      {
-        sourcemap: true,
-        legacy: true,
-        freeze: false,
-        esModule: false,
-        file: './core/dist/urql-core.es.js',
-        format: 'esm',
-      },
-    ],
-  },
-  {
-    ...makeConfig('./src/client.ts'),
-    plugins: makePlugins(true, './core/dist'),
-    onwarn: () => {},
-    output: [
-      {
-        sourcemap: false,
-        legacy: true,
-        freeze: false,
-        file: './core/dist/urql-core.min.js',
-        format: 'cjs',
-      },
-      {
-        sourcemap: false,
-        legacy: true,
-        freeze: false,
-        file: './core/dist/urql-core.es.min.js',
+        dir: './dist/es/min',
         format: 'esm',
       },
     ],
