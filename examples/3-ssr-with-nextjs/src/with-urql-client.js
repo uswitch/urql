@@ -14,10 +14,10 @@ const withUrqlClient = (App) => {
     )
   };
 
-  withUrql.getInitialProps = async ({ AppTree }) => {
+  withUrql.getInitialProps = async (ctx) => {
+    const { AppTree } = ctx;
     // Run the wrapped component's getInitialProps function
     let appProps = {};
-
     if (App.getInitialProps) appProps = await App.getInitialProps(ctx);
 
     // getInitialProps is universal, but we only want
@@ -29,12 +29,12 @@ const withUrqlClient = (App) => {
 
     // Run suspense and hence all urql queries
     await ssrPrepass(
-      <Provider value={urqlClient}>
-        <App
-          {...appProps}
-          urqlClient={urqlClient}
-        />
-      </Provider>
+      <AppTree
+        pageProps={{
+          ...appProps,
+          urqlClient
+        }}
+      />
     );
 
     // Extract query data from the urql store
