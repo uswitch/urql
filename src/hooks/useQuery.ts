@@ -34,6 +34,7 @@ export const useQuery = <T = any, V = object>(
 ): UseQueryResponse<T> => {
   const unsubscribe = useRef(noop);
   const client = useClient();
+  const prevRequest = useRef<undefined | GraphQLRequest>(undefined);
 
   // This is like useState but updates the state object
   // immediately, when we're still before the initial mount
@@ -44,12 +45,15 @@ export const useQuery = <T = any, V = object>(
     extensions: undefined,
   });
 
-  // This creates a request which will keep a stable reference
-  // if request.key doesn't change
-  const request = useRequest(args.query, args.variables);
-
   const executeQuery = useCallback(
-    (opts?: Partial<OperationContext>) => {
+    (opts?: Partial<OperationContext>,
+    variables: object = {}) => {
+      // This creates a request which will keep a stable reference
+      // if request.key doesn't change
+      const request = createRequest(args.query, ({...args.variables, ...variables} || {}));
+      if (prevRequest.current && prevRequest.current.key === request.key) return;
+      prevRequest.current = request;
+
       unsubscribe.current();
 
       setState(s => ({ ...s, fetching: true }));
@@ -69,10 +73,11 @@ export const useQuery = <T = any, V = object>(
     },
     [
       args.context,
+      args.query,
+      args.variables,
       args.requestPolicy,
       args.pollInterval,
       client,
-      request,
       setState,
     ]
   );
